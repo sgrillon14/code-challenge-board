@@ -1,0 +1,257 @@
+--
+-- PostgreSQL database dump
+--
+
+
+--
+-- Name: battle_primary_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY battle
+    ADD CONSTRAINT battle_primary_key PRIMARY KEY (battleid);
+
+
+--
+-- Name: exercise_in_battle_primary_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY exercise_in_battle
+    ADD CONSTRAINT exercise_in_battle_primary_key PRIMARY KEY (exerciseid, battleid);
+
+
+--
+-- Name: exercise_primary_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY exercise
+    ADD CONSTRAINT exercise_primary_key PRIMARY KEY (exerciseid);
+
+
+--
+-- Name: history_pk; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY history
+    ADD CONSTRAINT history_pk PRIMARY KEY (historyid);
+
+
+--
+-- Name: player_in_team_primary_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY player_in_team
+    ADD CONSTRAINT player_in_team_primary_key PRIMARY KEY (playerid, teamid);
+
+
+--
+-- Name: player_primary_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY player
+    ADD CONSTRAINT player_primary_key PRIMARY KEY (playerid);
+
+
+--
+-- Name: score_primary_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY score
+    ADD CONSTRAINT score_primary_key PRIMARY KEY (scoreid);
+
+
+--
+-- Name: site_primary_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY site
+    ADD CONSTRAINT site_primary_key PRIMARY KEY (siteid);
+
+
+--
+-- Name: team_in_battle_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY team_in_battle
+    ADD CONSTRAINT team_in_battle_pkey PRIMARY KEY (battleid, teamid);
+
+
+--
+-- Name: team_primary_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY team
+    ADD CONSTRAINT team_primary_key PRIMARY KEY (teamid);
+
+
+--
+-- Name: user_unique_login; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT user_unique_login UNIQUE (username);
+
+
+--
+-- Name: users_pk; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT users_pk PRIMARY KEY (username);
+
+
+--
+-- Name: users_roles_pk; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY users_roles
+    ADD CONSTRAINT users_roles_pk PRIMARY KEY (username, role);
+
+
+--
+-- Name: history_delete_protection; Type: RULE; Schema: public; Owner: postgres
+--
+
+CREATE RULE history_delete_protection AS
+    ON DELETE TO history DO INSTEAD NOTHING;
+
+
+--
+-- Name: scoreudelete; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER scoreudelete BEFORE DELETE ON score FOR EACH ROW EXECUTE PROCEDURE scoredelete();
+
+
+--
+-- Name: scoreupdate; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER scoreupdate AFTER INSERT OR UPDATE ON score FOR EACH ROW EXECUTE PROCEDURE scoreupdate();
+
+
+--
+-- Name: exercise_in_battle_battleId_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY exercise_in_battle
+    ADD CONSTRAINT "exercise_in_battle_battleId_fk" FOREIGN KEY (battleid) REFERENCES battle(battleid) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: exercise_in_battle_exercisesId_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY exercise_in_battle
+    ADD CONSTRAINT "exercise_in_battle_exercisesId_fk" FOREIGN KEY (exerciseid) REFERENCES exercise(exerciseid) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: player_in_team_playerId_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY player_in_team
+    ADD CONSTRAINT "player_in_team_playerId_fk" FOREIGN KEY (playerid) REFERENCES player(playerid) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: player_in_team_teamId; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY player_in_team
+    ADD CONSTRAINT "player_in_team_teamId" FOREIGN KEY (teamid) REFERENCES team(teamid) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: player_siteId_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY player
+    ADD CONSTRAINT "player_siteId_fk" FOREIGN KEY (siteid) REFERENCES site(siteid) ON UPDATE CASCADE ON DELETE SET DEFAULT;
+
+
+--
+-- Name: score_battleId_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY score
+    ADD CONSTRAINT "score_battleId_fk" FOREIGN KEY (battleid) REFERENCES battle(battleid);
+
+
+--
+-- Name: score_exerciseId_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY score
+    ADD CONSTRAINT "score_exerciseId_fk" FOREIGN KEY (exerciseid) REFERENCES exercise(exerciseid);
+
+
+--
+-- Name: score_teamId_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY score
+    ADD CONSTRAINT "score_teamId_fk" FOREIGN KEY (teamid) REFERENCES team(teamid);
+
+
+--
+-- Name: score_username_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY score
+    ADD CONSTRAINT score_username_fk FOREIGN KEY (username) REFERENCES users(username);
+
+
+--
+-- Name: team_in_battle_battleId_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY team_in_battle
+    ADD CONSTRAINT "team_in_battle_battleId_fk" FOREIGN KEY (battleid) REFERENCES battle(battleid) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: team_in_battle_teamId_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY team_in_battle
+    ADD CONSTRAINT "team_in_battle_teamId_fk" FOREIGN KEY (teamid) REFERENCES team(teamid) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: team_siteID_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY team
+    ADD CONSTRAINT "team_siteID_fk" FOREIGN KEY (siteid) REFERENCES site(siteid) ON UPDATE CASCADE ON DELETE SET DEFAULT;
+
+
+--
+-- Name: user_siteid_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT user_siteid_fk FOREIGN KEY (siteid) REFERENCES site(siteid);
+
+
+--
+-- Name: users_roles_username_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY users_roles
+    ADD CONSTRAINT users_roles_username_fk FOREIGN KEY (username) REFERENCES users(username);
+
+
+--
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- PostgreSQL database dump complete
+--
+

@@ -1,0 +1,11 @@
+1	Saurez-vous trouver le message secret ?	Saurez-vous trouver le message secret ?	25	9	5
+2	Plouf-Plouf	Plouf-Plouf	18	6	4
+3	Traitement d'un fichier	Traitement d'un fichier	20	8	4
+4	Chemin le plus court pour un GPS	Chemin le plus court pour un GPS	30	12	5
+5	Il y a un pharaon dans ma console	Il y a un pharaon dans ma console	5	2	7
+6	Avoir les fils qui se touchent	Avoir les fils qui se touchent	15	7	4
+7	Le menuisier	Le menuisier	10	5	3
+8	Route 66	Route 66	12	6	4
+9	Compter comme un Romain	Compter comme un Romain	17	8	4
+10	Lambda Decoder	Lambda Decoder	35	15	6
+11	La Suite Folle	La Suite Folle	8	4	4

@@ -1,0 +1,15 @@
+--
+--	Name:	users;	Type:	TABLE;	Schema:	public;	Owner:	postgres;	Tablespace:
+--
+
+truncate users;
+COPY	users	(username,	siteid,	password,	enabled,	role)	FROM	'/battle-initdb/users.txt';
+select count(1) as nbrUsers from users;
+
+--
+--	Data	for	Name:	users_roles;	Type:	TABLE	DATA;	Schema:	public;	Owner:	postgres
+--
+truncate users_roles;
+--COPY	users_roles	(role,	username)	FROM	'/battle-initdb/users_roles.txt';
+INSERT INTO users_roles (role, username) SELECT role, username from users;
+select count(1) as nbrUsersRole from users_roles;

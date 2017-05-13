@@ -1,0 +1,608 @@
+--
+-- PostgreSQL database dump
+--
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner:
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner:
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+SET search_path = public, pg_catalog;
+
+--
+-- Name: scoredelete(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION scoredelete() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+   BEGIN
+Update team_in_battle tib set score = (select sum(score) from score s where s.teamid = tib.teamid) - OLD.score where tib.teamid = OLD.teamid;
+RETURN OLD;
+   END;
+$$;
+
+
+ALTER FUNCTION public.scoredelete() OWNER TO postgres;
+
+--
+-- Name: scoreupdate(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION scoreupdate() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+   BEGIN
+Update team_in_battle tib set score = (select sum(score) from score s where s.teamid = tib.teamid) where tib.teamid = NEW.teamid;
+RETURN NEW;
+   END;
+$$;
+
+
+ALTER FUNCTION public.scoreupdate() OWNER TO postgres;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: battle; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
+--
+
+CREATE TABLE battle (
+    battleid integer NOT NULL,
+    visible boolean DEFAULT true NOT NULL,
+    key character varying(50) NOT NULL,
+    theoricstartingdate timestamp without time zone NOT NULL,
+    effectivestartingdate timestamp without time zone,
+    running boolean DEFAULT false NOT NULL,
+    ended boolean DEFAULT false NOT NULL,
+    battlename character varying(200)
+);
+
+
+ALTER TABLE public.battle OWNER TO postgres;
+
+--
+-- Name: TABLE battle; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE battle IS 'table containing the battles';
+
+
+--
+-- Name: battle_battleId_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE "battle_battleId_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."battle_battleId_seq" OWNER TO postgres;
+
+--
+-- Name: battle_battleId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE "battle_battleId_seq" OWNED BY battle.battleid;
+
+
+--
+-- Name: exercise; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
+--
+
+CREATE TABLE exercise (
+    exerciseid integer NOT NULL,
+    exercisename character varying(50) NOT NULL,
+    text character varying(200),
+    points integer NOT NULL,
+    bonus integer NOT NULL,
+    malus integer NOT NULL
+);
+
+
+ALTER TABLE public.exercise OWNER TO postgres;
+
+--
+-- Name: TABLE exercise; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE exercise IS 'table containing the exercises';
+
+
+--
+-- Name: exercise_exerciseId_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE "exercise_exerciseId_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."exercise_exerciseId_seq" OWNER TO postgres;
+
+--
+-- Name: exercise_exerciseId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE "exercise_exerciseId_seq" OWNED BY exercise.exerciseid;
+
+
+--
+-- Name: exercise_in_battle; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
+--
+
+CREATE TABLE exercise_in_battle (
+    exerciseid integer NOT NULL,
+    battleid integer NOT NULL
+);
+
+
+ALTER TABLE public.exercise_in_battle OWNER TO postgres;
+
+--
+-- Name: TABLE exercise_in_battle; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE exercise_in_battle IS 'association table between battles and exercises';
+
+
+--
+-- Name: history; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
+--
+
+CREATE TABLE history (
+    historyid integer NOT NULL,
+    date timestamp without time zone DEFAULT statement_timestamp(),
+    battleid integer,
+    exerciceid integer,
+    teamid integer,
+    pointsdelta integer,
+    ipadress character varying(50),
+    event character varying(200),
+    username character varying(50)
+);
+
+
+ALTER TABLE public.history OWNER TO postgres;
+
+--
+-- Name: TABLE history; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE history IS 'log events from battles';
+
+
+--
+-- Name: history_historyid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE history_historyid_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.history_historyid_seq OWNER TO postgres;
+
+--
+-- Name: history_historyid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE history_historyid_seq OWNED BY history.historyid;
+
+
+--
+-- Name: player; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
+--
+
+CREATE TABLE player (
+    playerid integer NOT NULL,
+    playername character varying(50) NOT NULL,
+    siteid integer DEFAULT 1 NOT NULL,
+    playerpicture character varying(200)
+);
+
+
+ALTER TABLE public.player OWNER TO postgres;
+
+--
+-- Name: TABLE player; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE player IS 'table containing the players';
+
+
+--
+-- Name: player_in_team; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
+--
+
+CREATE TABLE player_in_team (
+    playerid integer NOT NULL,
+    teamid integer NOT NULL
+);
+
+
+ALTER TABLE public.player_in_team OWNER TO postgres;
+
+--
+-- Name: TABLE player_in_team; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE player_in_team IS 'association table between a player and his team';
+
+
+--
+-- Name: player_playerId_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE "player_playerId_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."player_playerId_seq" OWNER TO postgres;
+
+--
+-- Name: player_playerId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE "player_playerId_seq" OWNED BY player.playerid;
+
+
+--
+-- Name: score; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
+--
+
+CREATE TABLE score (
+    battleid integer NOT NULL,
+    teamid integer NOT NULL,
+    exerciseid integer NOT NULL,
+    score integer DEFAULT 0 NOT NULL,
+    scoreid integer NOT NULL,
+    username character varying(50) NOT NULL
+);
+
+
+ALTER TABLE public.score OWNER TO postgres;
+
+--
+-- Name: TABLE score; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE score IS 'table that handle the score for a given battle, a given team, a given exercise, by a given user (referee)';
+
+
+--
+-- Name: score_scoreid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE score_scoreid_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.score_scoreid_seq OWNER TO postgres;
+
+--
+-- Name: score_scoreid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE score_scoreid_seq OWNED BY score.scoreid;
+
+
+--
+-- Name: site; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
+--
+
+CREATE TABLE site (
+    siteid integer NOT NULL,
+    sitename character varying(50) NOT NULL
+);
+
+
+ALTER TABLE public.site OWNER TO postgres;
+
+--
+-- Name: TABLE site; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE site IS 'table containing the sites';
+
+
+--
+-- Name: site_siteId_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE "site_siteId_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."site_siteId_seq" OWNER TO postgres;
+
+--
+-- Name: site_siteId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE "site_siteId_seq" OWNED BY site.siteid;
+
+
+--
+-- Name: team; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
+--
+
+CREATE TABLE team (
+    teamid integer NOT NULL,
+    teamname character varying(50) NOT NULL,
+    siteid integer DEFAULT 1 NOT NULL,
+    teampicture character varying(200)
+);
+
+
+ALTER TABLE public.team OWNER TO postgres;
+
+--
+-- Name: TABLE team; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE team IS 'table containing the teams';
+
+
+--
+-- Name: team_in_battle; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
+--
+
+CREATE TABLE team_in_battle (
+    teamid integer NOT NULL,
+    battleid integer NOT NULL,
+    score integer DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE public.team_in_battle OWNER TO postgres;
+
+--
+-- Name: TABLE team_in_battle; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE team_in_battle IS 'associationtable between teams and battles (handle the running or final score)';
+
+
+--
+-- Name: team_teamId_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE "team_teamId_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."team_teamId_seq" OWNER TO postgres;
+
+--
+-- Name: team_teamId_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE "team_teamId_seq" OWNED BY team.teamid;
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
+--
+
+CREATE TABLE users (
+    username character varying(50) NOT NULL,
+    siteid integer,
+    password character varying(50),
+    enabled integer DEFAULT 1 NOT NULL,
+    role character varying(50) DEFAULT 'ROLE_USER'::character varying NOT NULL
+);
+
+
+ALTER TABLE public.users OWNER TO postgres;
+
+--
+-- Name: TABLE users; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE users IS 'table containing the registred users of the application';
+
+
+--
+-- Name: users_roles; Type: TABLE; Schema: public; Owner: postgres; Tablespace:
+--
+
+CREATE TABLE users_roles (
+    role character varying(50) NOT NULL,
+    username character varying(50) NOT NULL
+);
+
+
+ALTER TABLE public.users_roles OWNER TO postgres;
+
+--
+-- Name: TABLE users_roles; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE users_roles IS 'association table between a user and his role(s)';
+
+
+--
+-- Name: battleid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY battle ALTER COLUMN battleid SET DEFAULT nextval('"battle_battleId_seq"'::regclass);
+
+
+--
+-- Name: exerciseid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY exercise ALTER COLUMN exerciseid SET DEFAULT nextval('"exercise_exerciseId_seq"'::regclass);
+
+
+--
+-- Name: historyid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY history ALTER COLUMN historyid SET DEFAULT nextval('history_historyid_seq'::regclass);
+
+
+--
+-- Name: playerid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY player ALTER COLUMN playerid SET DEFAULT nextval('"player_playerId_seq"'::regclass);
+
+
+--
+-- Name: scoreid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY score ALTER COLUMN scoreid SET DEFAULT nextval('score_scoreid_seq'::regclass);
+
+
+--
+-- Name: siteid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY site ALTER COLUMN siteid SET DEFAULT nextval('"site_siteId_seq"'::regclass);
+
+
+--
+-- Name: teamid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY team ALTER COLUMN teamid SET DEFAULT nextval('"team_teamId_seq"'::regclass);
+
+
+--
+-- Data for Name: battle; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY battle (battleid, visible, key, theoricstartingdate, effectivestartingdate, running, ended, battlename) FROM stdin;
+1	t	01-6102edoCelttaB	2016-10-19 18:30:00	\N	t	f	BattleCodeEtudiantsRennes2016
+\.
+
+
+--
+-- Name: battle_battleId_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('"battle_battleId_seq"', 1, false);
+
+
+--
+-- Data for Name: exercise; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+truncate exercise;
+COPY exercise (exerciseid, exercisename, text, points, bonus, malus) FROM '/battle-initdb/exercises.txt';
+
+--
+-- Name: exercise_exerciseId_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('"exercise_exerciseId_seq"', 1, false);
+
+
+--
+-- Data for Name: exercise_in_battle; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+truncate exercise_in_battle;
+COPY exercise_in_battle (exerciseid, battleid) FROM stdin;
+1	1
+2	1
+3	1
+4	1
+5	1
+6	1
+7	1
+8	1
+9	1
+10	1
+11	1
+\.
+
+
+--
+-- Name: history_historyid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('history_historyid_seq', 6585, true);
+
+
+
+--
+-- Name: player_playerId_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('"player_playerId_seq"', 1, false);
+
+
+--
+-- Name: score_scoreid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('score_scoreid_seq', 8110, true);
+
+
+--
+-- Data for Name: site; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY site (siteid, sitename) FROM stdin;
+1	FR - Rennes
+\.
+
+
+--
+-- Name: site_siteId_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('"site_siteId_seq"', 100, true);
+
+
+
+--
+-- PostgreSQL database dump complete
+--
+

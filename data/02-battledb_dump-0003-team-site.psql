@@ -1,0 +1,44 @@
+--
+-- PostgreSQL database dump
+--
+
+truncate site;
+
+COPY site (siteid, sitename) FROM '/battle-initdb/site.txt';
+
+select count(1) as nbrSite from site;
+
+--
+-- Name: site_siteId_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('"site_siteId_seq"', 100, true);
+
+
+--
+-- Data for Name: team; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+truncate team;
+COPY team (teamid, teamname, siteid, teampicture) FROM '/battle-initdb/team.txt';
+
+select count(1) from team;
+
+--
+-- Data for Name: team_in_battle; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+truncate team_in_battle	;
+COPY team_in_battle (teamid, battleid) FROM '/battle-initdb/team_in_battle.txt';
+
+select count(1) from team_in_battle;
+
+--
+-- Name: team_teamId_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('"team_teamId_seq"', 300, true);
+
+
+--
+-- PostgreSQL database dump complete
+--
+
